@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id">
       <body className="bg-stone-50">
-        <div className="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative">
+        <div className="w-full min-h-screen bg-white md:bg-stone-50">
           {children}
         </div>
       </body>
