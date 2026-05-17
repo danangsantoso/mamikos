@@ -67,8 +67,9 @@ export default function LoginView() {
 
   if (mode === 'register') {
     return (
-      <div className="animate-fade-in min-h-screen">
-        <div className="sticky top-0 bg-white border-b border-stone-100 px-5 py-4 flex items-center gap-3">
+      <div className="animate-fade-in min-h-screen md:flex md:items-center md:justify-center md:py-8">
+        <div className="md:max-w-md md:w-full md:bg-white md:rounded-3xl md:shadow-xl md:overflow-hidden">
+        <div className="sticky top-0 bg-white border-b border-stone-100 px-5 py-4 flex items-center gap-3 md:relative md:rounded-t-3xl">
           <button onClick={() => setMode('login')}><ArrowLeft size={22} /></button>
           <h1 className="font-display text-lg font-bold text-stone-900">Daftar Akun</h1>
         </div>
@@ -119,13 +120,15 @@ export default function LoginView() {
             <button onClick={() => setMode('login')} className="text-green-700 font-bold">Masuk</button>
           </div>
         </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="animate-fade-in min-h-screen flex flex-col">
-      <div className="relative px-6 pt-16 pb-12 text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%)' }}>
+    <div className="animate-fade-in min-h-screen flex flex-col md:items-center md:justify-center md:py-8">
+      <div className="w-full md:max-w-md md:bg-white md:rounded-3xl md:shadow-xl md:overflow-hidden flex flex-col">
+      <div className="relative px-6 pt-16 pb-12 text-white overflow-hidden md:pt-10" style={{ background: 'linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%)' }}>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 80%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
         <div className="relative">
           <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center mb-4">
@@ -189,6 +192,7 @@ export default function LoginView() {
           Belum punya akun?{' '}
           <button onClick={() => setMode('register')} className="text-green-700 font-bold">Daftar di sini</button>
         </div>
+      </div>
       </div>
     </div>
   );
