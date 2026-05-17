@@ -8,7 +8,7 @@ import {
   TrendingUp, Award, Zap, Users, Clock, Plus, Settings, Bell, ChevronRight, Edit3, FileText,
   HelpCircle, LogOut, Sparkles, Eye, LayoutDashboard, Building2, DollarSign, BarChart3, Trash2,
   CheckCircle, XCircle, AlertCircle, UserCheck, Activity, Upload, MoreVertical, ArrowUpRight,
-  Crown, ShieldCheck, Ban, FileBarChart, Wallet, Phone, Share2
+  Crown, ShieldCheck, Ban, FileBarChart, Wallet, Phone, Share2, Mail, Lock
 } from 'lucide-react';
 
 const CITIES = ['Semua Kota', 'Jakarta Selatan', 'Jakarta Pusat', 'Yogyakarta', 'Bandung', 'Surabaya', 'Malang'];
@@ -116,7 +116,11 @@ export default function MainApp({ user, onLogout }: { user: any; onLogout: () =>
   }
 
   return (
-    <div className="pb-20">
+    <div className="pb-20 md:pb-0 md:flex md:max-w-7xl md:mx-auto md:gap-6 md:p-6">
+      <div className="hidden md:block md:w-64 md:flex-shrink-0">
+        <DesktopSideNav page={page} navigateTo={navigateTo} role={user.role} user={user} onLogout={onLogout} wishlistCount={wishlist.length} pendingCount={user.role === 'admin' ? kosList.filter(k => k.status === 'pending').length : bookings.filter(b => b.status === 'pending' && kosList.find(k => k.id === b.kosId)?.owner_id === user.id).length} />
+      </div>
+      <div className="flex-1 min-w-0 md:bg-white md:rounded-3xl md:shadow-sm md:overflow-hidden md:min-h-[calc(100vh-3rem)]">
       {/* TENANT PAGES */}
       {user.role === 'tenant' && (
         <>
@@ -130,6 +134,9 @@ export default function MainApp({ user, onLogout }: { user: any; onLogout: () =>
           {page === 'chatRoom' && selectedKos && <ChatRoomPage kos={selectedKos} navigateTo={navigateTo} user={user} />}
           {page === 'profile' && <ProfilePage navigateTo={navigateTo} user={user} bookings={bookings.filter(b => b.user_id === user.id)} onLogout={onLogout} />}
           {page === 'bookings' && <MyBookingsPage bookings={bookings.filter(b => b.user_id === user.id)} kosData={kosList} navigateTo={navigateTo} />}
+          {page === 'notifications' && <NotificationsPage user={user} navigateTo={navigateTo} supabase={supabase} backTo="profile" />}
+          {page === 'settings' && <SettingsPage user={user} navigateTo={navigateTo} supabase={supabase} backTo="profile" />}
+          {page === 'help' && <HelpPage navigateTo={navigateTo} backTo="profile" />}
 
           {!['detail', 'booking', 'success', 'chatRoom'].includes(page) && (
             <BottomNav page={page} navigateTo={navigateTo} wishlistCount={wishlist.length} role="tenant" />
@@ -146,6 +153,10 @@ export default function MainApp({ user, onLogout }: { user: any; onLogout: () =>
           {page === 'ownerKosDetail' && selectedKos && <OwnerKosDetail kos={selectedKos} bookings={bookings} navigateTo={navigateTo} supabase={supabase} onUpdate={loadData} />}
           {page === 'ownerBookings' && <OwnerBookings user={user} kosList={kosList} bookings={bookings} supabase={supabase} onUpdate={loadData} />}
           {page === 'ownerProfile' && <OwnerProfile user={user} navigateTo={navigateTo} onLogout={onLogout} kosList={kosList.filter(k => k.owner_id === user.id)} />}
+          {page === 'ownerReports' && <OwnerReports user={user} kosList={kosList.filter(k => k.owner_id === user.id)} bookings={bookings} navigateTo={navigateTo} />}
+          {page === 'ownerWallet' && <OwnerWallet user={user} kosList={kosList.filter(k => k.owner_id === user.id)} bookings={bookings} navigateTo={navigateTo} />}
+          {page === 'ownerSettings' && <SettingsPage user={user} navigateTo={navigateTo} supabase={supabase} backTo="ownerProfile" />}
+          {page === 'ownerNotifications' && <NotificationsPage user={user} navigateTo={navigateTo} supabase={supabase} backTo="ownerProfile" />}
 
           <BottomNav page={page} navigateTo={navigateTo} role="owner" pendingCount={bookings.filter(b => b.status === 'pending' && kosList.find(k => k.id === b.kosId)?.owner_id === user.id).length} />
         </>
@@ -160,10 +171,13 @@ export default function MainApp({ user, onLogout }: { user: any; onLogout: () =>
           {page === 'adminBookings' && <AdminBookings bookings={bookings} kosList={kosList} navigateTo={navigateTo} />}
           {page === 'adminReports' && <AdminReports kosList={kosList} bookings={bookings} navigateTo={navigateTo} />}
           {page === 'adminProfile' && <AdminProfile user={user} navigateTo={navigateTo} onLogout={onLogout} />}
+          {page === 'adminUsers' && <AdminUsers supabase={supabase} navigateTo={navigateTo} />}
+          {page === 'adminSettings' && <SettingsPage user={user} navigateTo={navigateTo} supabase={supabase} backTo="adminProfile" />}
 
           <BottomNav page={page} navigateTo={navigateTo} role="admin" pendingCount={kosList.filter(k => k.status === 'pending').length} />
         </>
       )}
+      </div>
     </div>
   );
 }
@@ -174,7 +188,7 @@ function HomePage({ kosData, wishlist, toggleWishlist, navigateTo, setFilters }:
     <div className="animate-fade-in">
       <div className="relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%)' }}>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 80%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-        <div className="relative px-5 pt-12 pb-8 text-white">
+        <div className="relative px-5 pt-12 md:pt-6 pb-8 text-white">
           <div className="flex items-center justify-between mb-6">
             <div>
               <p className="text-xs text-green-100 mb-1">Selamat datang 👋</p>
@@ -229,8 +243,8 @@ function HomePage({ kosData, wishlist, toggleWishlist, navigateTo, setFilters }:
 
       <div className="px-5 mb-6">
         <div className="flex items-center gap-2 mb-4"><Zap size={20} className="text-green-700" /><h2 className="font-display text-lg font-bold">Rekomendasi</h2></div>
-        <div className="space-y-3">
-          {kosData.slice(0, 4).map((kos: any) => <KosCard key={kos.id} kos={kos} wishlist={wishlist} toggleWishlist={toggleWishlist} navigateTo={navigateTo} />)}
+        <div className="space-y-3 md:space-y-0 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-3">
+          {kosData.slice(0, 6).map((kos: any) => <KosCard key={kos.id} kos={kos} wishlist={wishlist} toggleWishlist={toggleWishlist} navigateTo={navigateTo} />)}
         </div>
       </div>
     </div>
@@ -320,9 +334,9 @@ function SearchPage({ kosData, wishlist, toggleWishlist, navigateTo, searchQuery
         </div>
       </div>
       <div className="px-5 py-3"><p className="text-sm text-stone-600"><span className="font-bold">{kosData.length}</span> kos ditemukan</p></div>
-      <div className="px-5 space-y-3">
+      <div className="px-5 space-y-3 md:space-y-0 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-3 pb-6">
         {kosData.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="text-center py-16 md:col-span-2 xl:col-span-3">
             <Search size={48} className="mx-auto text-stone-300 mb-3" />
             <p className="font-semibold">Tidak ada hasil</p>
           </div>
@@ -418,7 +432,7 @@ function DetailPage({ kos, wishlist, toggleWishlist, navigateTo }: any) {
           <div className="space-y-2">{(kos.rules || []).map((r: string, i: number) => <div key={i} className="flex items-start gap-2"><Shield size={14} className="text-green-700 mt-0.5" /><span className="text-sm text-stone-600">{r}</span></div>)}</div>
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-stone-100 p-4 flex items-center gap-3">
+      <div className="md:relative md:border md:rounded-2xl md:mt-4 md:mx-5 fixed bottom-0 left-0 right-0 bg-white border-t border-stone-100 p-4 flex items-center gap-3">
         <div className="flex-1"><p className="text-[10px] text-stone-500">Mulai dari</p><p className="font-display font-bold text-xl">{formatRupiah(kos.price_monthly)}<span className="text-xs text-stone-500 font-normal">/bulan</span></p></div>
         <button onClick={() => navigateTo('booking', kos)} className="px-6 py-3 bg-green-700 text-white rounded-xl font-bold text-sm">Booking Sekarang</button>
       </div>
@@ -498,7 +512,7 @@ function BookingPage({ kos, navigateTo, user, supabase, onSuccess }: any) {
           <div className="border-t border-stone-200 pt-2 flex justify-between"><span className="font-bold">Total</span><span className="font-bold text-green-700 text-lg">{formatRupiah(finalTotal)}</span></div>
         </div>
       </div>
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-stone-100 p-4">
+      <div className="md:relative md:border md:rounded-2xl md:mt-4 md:mx-5 fixed bottom-0 left-0 right-0 bg-white border-t border-stone-100 p-4">
         <button onClick={handleBooking} disabled={!moveInDate || submitting} className="w-full py-4 bg-green-700 hover:bg-green-800 disabled:bg-stone-300 text-white rounded-xl font-bold">{submitting ? 'Memproses...' : 'Konfirmasi Booking'}</button>
       </div>
     </div>
@@ -525,10 +539,10 @@ function WishlistPage({ wishlist, kosData, toggleWishlist, navigateTo }: any) {
   const items = kosData.filter((k: any) => wishlist.includes(k.id));
   return (
     <div className="animate-fade-in pb-4">
-      <div className="px-5 pt-12 pb-4"><h1 className="font-display text-2xl font-bold">Tersimpan</h1><p className="text-sm text-stone-500 mt-1">{items.length} kos</p></div>
-      <div className="px-5 space-y-3">
+      <div className="px-5 pt-12 md:pt-6 pb-4 md:pt-6"><h1 className="font-display text-2xl font-bold">Tersimpan</h1><p className="text-sm text-stone-500 mt-1">{items.length} kos</p></div>
+      <div className="px-5 space-y-3 md:space-y-0 md:grid md:grid-cols-2 xl:grid-cols-3 md:gap-3 pb-6">
         {items.length === 0 ? (
-          <div className="text-center py-16">
+          <div className="text-center py-16 md:col-span-2 xl:col-span-3">
             <Heart size={48} className="mx-auto text-stone-300 mb-3" />
             <p className="font-semibold mb-1">Belum ada kos tersimpan</p>
             <button onClick={() => navigateTo('search')} className="mt-4 px-6 py-2.5 bg-green-700 text-white rounded-xl font-semibold text-sm">Cari Kos</button>
@@ -542,7 +556,7 @@ function WishlistPage({ wishlist, kosData, toggleWishlist, navigateTo }: any) {
 function ChatPage({ navigateTo, kosData }: any) {
   return (
     <div className="animate-fade-in">
-      <div className="px-5 pt-12 pb-4 border-b border-stone-100"><h1 className="font-display text-2xl font-bold">Pesan</h1></div>
+      <div className="px-5 pt-12 md:pt-6 pb-4 border-b border-stone-100"><h1 className="font-display text-2xl font-bold">Pesan</h1></div>
       <div>
         {kosData.slice(0, 3).map((kos: any) => (
           <button key={kos.id} onClick={() => navigateTo('chatRoom', kos)} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-stone-50 border-b border-stone-50 text-left">
@@ -597,13 +611,13 @@ function ProfilePage({ navigateTo, user, bookings, onLogout }: any) {
   const menuItems = [
     { icon: FileText, label: 'Booking Saya', desc: `${bookings.length} aktif`, action: () => navigateTo('bookings') },
     { icon: Heart, label: 'Tersimpan', action: () => navigateTo('wishlist') },
-    { icon: Bell, label: 'Notifikasi' },
-    { icon: Settings, label: 'Pengaturan' },
-    { icon: HelpCircle, label: 'Bantuan' },
+    { icon: Bell, label: 'Notifikasi', action: () => navigateTo('notifications') },
+    { icon: Settings, label: 'Pengaturan', action: () => navigateTo('settings') },
+    { icon: HelpCircle, label: 'Bantuan', action: () => navigateTo('help') },
   ];
   return (
     <div className="animate-fade-in pb-4">
-      <div className="relative px-5 pt-12 pb-6" style={{ background: 'linear-gradient(135deg, #14532d 0%, #166534 100%)' }}>
+      <div className="relative px-5 pt-12 md:pt-6 pb-6" style={{ background: 'linear-gradient(135deg, #14532d 0%, #166534 100%)' }}>
         <h1 className="font-display text-2xl font-bold text-white mb-6">Profil Saya</h1>
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-green-800 font-display font-bold text-3xl">{(user.full_name || user.email)[0].toUpperCase()}</div>
@@ -701,7 +715,7 @@ function OwnerDashboard({ user, kosList, bookings, navigateTo }: any) {
 
   return (
     <div className="animate-fade-in pb-4">
-      <div className="relative px-5 pt-12 pb-20 text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%)' }}>
+      <div className="relative px-5 pt-12 md:pt-6 pb-20 text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%)' }}>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
         <div className="relative">
           <div className="flex items-center justify-between mb-6">
@@ -880,7 +894,7 @@ function OwnerAddKos({ user, navigateTo, editingKos, supabase, onSuccess }: any)
           </div>
         )}
       </div>
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-stone-100 p-4 flex gap-3">
+      <div className="md:relative md:border md:rounded-2xl md:mt-4 md:mx-5 fixed bottom-0 left-0 right-0 bg-white border-t border-stone-100 p-4 flex gap-3">
         {step > 1 && <button onClick={() => setStep(step - 1)} className="flex-1 py-3.5 border border-stone-200 rounded-xl font-semibold text-sm">Kembali</button>}
         {step < 3 ? (
           <button onClick={() => setStep(step + 1)} className="flex-1 py-3.5 bg-green-700 text-white rounded-xl font-bold">Lanjut</button>
@@ -1002,7 +1016,7 @@ function OwnerBookings({ user, kosList, bookings, supabase, onUpdate }: any) {
 function OwnerProfile({ user, navigateTo, onLogout, kosList }: any) {
   return (
     <div className="animate-fade-in pb-4">
-      <div className="relative px-5 pt-12 pb-6" style={{ background: 'linear-gradient(135deg, #14532d 0%, #166534 100%)' }}>
+      <div className="relative px-5 pt-12 md:pt-6 pb-6" style={{ background: 'linear-gradient(135deg, #14532d 0%, #166534 100%)' }}>
         <h1 className="font-display text-2xl font-bold text-white mb-6">Profil Owner</h1>
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-green-800 font-display font-bold text-3xl">{(user.full_name || 'O')[0]}</div>
@@ -1013,7 +1027,10 @@ function OwnerProfile({ user, navigateTo, onLogout, kosList }: any) {
         <div className="bg-white rounded-2xl border border-stone-100 overflow-hidden">
           {[
             { icon: Building2, label: 'Kos Saya', desc: `${kosList.length} listing`, action: () => navigateTo('ownerKos') },
-            { icon: FileBarChart, label: 'Laporan' }, { icon: Wallet, label: 'Rekening' }, { icon: Settings, label: 'Pengaturan' }
+            { icon: FileBarChart, label: 'Laporan', action: () => navigateTo('ownerReports') },
+            { icon: Wallet, label: 'Rekening', action: () => navigateTo('ownerWallet') },
+            { icon: Bell, label: 'Notifikasi', action: () => navigateTo('ownerNotifications') },
+            { icon: Settings, label: 'Pengaturan', action: () => navigateTo('ownerSettings') }
           ].map((item: any, i) => (
             <button key={i} onClick={item.action} className="w-full px-4 py-3.5 flex items-center gap-3 hover:bg-stone-50 border-b border-stone-50 last:border-b-0 text-left">
               <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center"><item.icon size={18} className="text-green-700" /></div>
@@ -1035,7 +1052,7 @@ function AdminDashboard({ kosList, bookings, navigateTo }: any) {
 
   return (
     <div className="animate-fade-in pb-4">
-      <div className="relative px-5 pt-12 pb-20 text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7e22ce 100%)' }}>
+      <div className="relative px-5 pt-12 md:pt-6 pb-20 text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #6d28d9 50%, #7e22ce 100%)' }}>
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
         <div className="relative">
           <div className="flex items-center justify-between mb-6">
@@ -1068,7 +1085,7 @@ function AdminDashboard({ kosList, bookings, navigateTo }: any) {
           <button onClick={() => navigateTo('adminKos')} className="p-4 bg-white border border-stone-100 rounded-2xl flex flex-col items-start gap-2"><Building2 size={22} className="text-green-700" /><div className="text-left"><p className="font-bold text-sm">Kelola Kos</p><p className="text-xs text-stone-500">Approve/reject</p></div></button>
           <button onClick={() => navigateTo('adminBookings')} className="p-4 bg-white border border-stone-100 rounded-2xl flex flex-col items-start gap-2"><FileText size={22} className="text-amber-600" /><div className="text-left"><p className="font-bold text-sm">Booking</p><p className="text-xs text-stone-500">Monitor</p></div></button>
           <button onClick={() => navigateTo('adminReports')} className="p-4 bg-white border border-stone-100 rounded-2xl flex flex-col items-start gap-2"><BarChart3 size={22} className="text-purple-600" /><div className="text-left"><p className="font-bold text-sm">Laporan</p><p className="text-xs text-stone-500">Analytics</p></div></button>
-          <button className="p-4 bg-white border border-stone-100 rounded-2xl flex flex-col items-start gap-2"><Users size={22} className="text-blue-600" /><div className="text-left"><p className="font-bold text-sm">Users</p><p className="text-xs text-stone-500">Manage</p></div></button>
+          <button onClick={() => navigateTo('adminUsers')} className="p-4 bg-white border border-stone-100 rounded-2xl flex flex-col items-start gap-2"><Users size={22} className="text-blue-600" /><div className="text-left"><p className="font-bold text-sm">Users</p><p className="text-xs text-stone-500">Manage</p></div></button>
         </div>
       </div>
     </div>
@@ -1128,7 +1145,7 @@ function AdminKosDetail({ kos, supabase, navigateTo, onUpdate }: any) {
         <div className="mb-5"><h3 className="font-display text-lg font-bold mb-3">Fasilitas</h3><div className="flex flex-wrap gap-2">{(kos.facilities || []).map((f: string) => <span key={f} className="px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full">{f}</span>)}</div></div>
       </div>
       {kos.status === 'pending' && (
-        <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-stone-100 p-4 grid grid-cols-2 gap-3">
+        <div className="md:relative md:border md:rounded-2xl md:mt-4 md:mx-5 fixed bottom-0 left-0 right-0 bg-white border-t border-stone-100 p-4 grid grid-cols-2 gap-3">
           <button onClick={reject} className="py-3.5 border border-red-200 text-red-600 rounded-xl font-bold text-sm flex items-center justify-center gap-2"><XCircle size={16} /> Tolak</button>
           <button onClick={approve} className="py-3.5 bg-green-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2"><CheckCircle size={16} /> Setujui</button>
         </div>
@@ -1194,7 +1211,7 @@ function AdminReports({ kosList, bookings, navigateTo }: any) {
 function AdminProfile({ user, navigateTo, onLogout }: any) {
   return (
     <div className="animate-fade-in pb-4">
-      <div className="relative px-5 pt-12 pb-6" style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%)' }}>
+      <div className="relative px-5 pt-12 md:pt-6 pb-6" style={{ background: 'linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%)' }}>
         <h1 className="font-display text-2xl font-bold text-white mb-6">Admin Panel</h1>
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center text-purple-800 font-display font-bold text-3xl">{(user.full_name || 'A')[0]}</div>
@@ -1206,7 +1223,8 @@ function AdminProfile({ user, navigateTo, onLogout }: any) {
           { icon: Building2, label: 'Kelola Kos', action: () => navigateTo('adminKos') },
           { icon: FileText, label: 'Semua Booking', action: () => navigateTo('adminBookings') },
           { icon: BarChart3, label: 'Laporan', action: () => navigateTo('adminReports') },
-          { icon: Settings, label: 'Pengaturan' }
+          { icon: Users, label: 'Kelola Users', action: () => navigateTo('adminUsers') },
+          { icon: Settings, label: 'Pengaturan', action: () => navigateTo('adminSettings') }
         ].map((item: any, i) => (
           <button key={i} onClick={item.action} className="w-full px-4 py-3.5 flex items-center gap-3 hover:bg-stone-50 border-b border-stone-50 last:border-b-0 text-left">
             <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center"><item.icon size={18} className="text-purple-600" /></div>
@@ -1220,48 +1238,239 @@ function AdminProfile({ user, navigateTo, onLogout }: any) {
   );
 }
 
-// ============ BOTTOM NAV ============
-function BottomNav({ page, navigateTo, wishlistCount, role, pendingCount }: any) {
-  let items: any[] = [];
-  if (role === 'tenant') {
-    items = [
-      { id: 'home', icon: Home, label: 'Beranda' },
-      { id: 'search', icon: Search, label: 'Cari' },
-      { id: 'wishlist', icon: Heart, label: 'Wishlist', badge: wishlistCount },
-      { id: 'chat', icon: MessageCircle, label: 'Pesan' },
-      { id: 'profile', icon: User, label: 'Profil' },
-    ];
-  } else if (role === 'owner') {
-    items = [
-      { id: 'ownerDashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { id: 'ownerKos', icon: Building2, label: 'Kos' },
-      { id: 'ownerBookings', icon: FileText, label: 'Booking', badge: pendingCount },
-      { id: 'ownerProfile', icon: User, label: 'Profil' },
-    ];
-  } else if (role === 'admin') {
-    items = [
-      { id: 'adminDashboard', icon: LayoutDashboard, label: 'Dashboard' },
-      { id: 'adminKos', icon: Building2, label: 'Kos', badge: pendingCount },
-      { id: 'adminBookings', icon: FileText, label: 'Booking' },
-      { id: 'adminReports', icon: BarChart3, label: 'Laporan' },
-      { id: 'adminProfile', icon: User, label: 'Profil' },
-    ];
-  }
-  const activeColor = role === 'admin' ? 'text-purple-600' : 'text-green-700';
+// ============ SHARED PAGES ============
+
+function NotificationsPage({ user, navigateTo, supabase, backTo }: any) {
+  const [notifs, setNotifs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      setNotifs(data || []);
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const markAllRead = async () => {
+    await supabase.from('notifications').update({ read: true }).eq('user_id', user.id).eq('read', false);
+    setNotifs(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const sampleNotifs = notifs.length > 0 ? notifs : [
+    { id: 's1', type: 'info', title: 'Selamat datang di Mamikos! 🎉', message: 'Mulai cari kos idaman Anda sekarang juga.', read: false, created_at: new Date().toISOString() },
+    { id: 's2', type: 'promo', title: 'Promo Spesial Awal Bulan', message: 'Diskon hingga 25% untuk booking pertama Anda.', read: false, created_at: new Date(Date.now() - 86400000).toISOString() },
+    { id: 's3', type: 'info', title: 'Tips: Lengkapi Profil Anda', message: 'Profil lengkap meningkatkan kepercayaan pemilik kos.', read: true, created_at: new Date(Date.now() - 259200000).toISOString() }
+  ];
+
+  const formatTime = (iso: string) => {
+    const diff = Date.now() - new Date(iso).getTime();
+    const min = Math.floor(diff / 60000);
+    const hour = Math.floor(min / 60);
+    const day = Math.floor(hour / 24);
+    if (day > 0) return `${day} hari lalu`;
+    if (hour > 0) return `${hour} jam lalu`;
+    if (min > 0) return `${min} menit lalu`;
+    return 'Baru saja';
+  };
+
+  const iconFor = (type: string) => {
+    if (type === 'promo') return { icon: Sparkles, color: 'bg-orange-100 text-orange-600' };
+    if (type === 'booking') return { icon: FileText, color: 'bg-blue-100 text-blue-600' };
+    if (type === 'message') return { icon: MessageCircle, color: 'bg-green-100 text-green-700' };
+    return { icon: Bell, color: 'bg-purple-100 text-purple-600' };
+  };
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-stone-100 px-2 py-2 flex items-center justify-around z-30">
-      {items.map(item => {
-        const active = page === item.id;
-        return (
-          <button key={item.id} onClick={() => navigateTo(item.id)} className="flex flex-col items-center gap-0.5 py-1.5 px-3 relative">
-            <div className="relative">
-              <item.icon size={22} className={active ? activeColor : 'text-stone-400'} strokeWidth={active ? 2.5 : 2} />
-              {item.badge > 0 && <span className="absolute -top-1.5 -right-2 min-w-4 h-4 px-1 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">{item.badge}</span>}
-            </div>
-            <span className={`text-[10px] ${active ? `${activeColor} font-semibold` : 'text-stone-500'}`}>{item.label}</span>
-          </button>
-        );
-      })}
+    <div className="animate-fade-in pb-4">
+      <div className="sticky top-0 z-20 bg-white border-b border-stone-100 px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigateTo(backTo)}><ArrowLeft size={22} /></button>
+          <h1 className="font-display text-lg font-bold">Notifikasi</h1>
+        </div>
+        {sampleNotifs.some(n => !n.read) && (
+          <button onClick={markAllRead} className="text-xs text-green-700 font-semibold">Tandai semua</button>
+        )}
+      </div>
+      {loading ? (
+        <div className="flex justify-center py-12"><div className="w-8 h-8 rounded-full border-2 border-green-700 border-t-transparent animate-spin"></div></div>
+      ) : sampleNotifs.length === 0 ? (
+        <div className="text-center py-16 px-5">
+          <Bell size={48} className="mx-auto text-stone-300 mb-3" />
+          <p className="font-semibold">Belum ada notifikasi</p>
+          <p className="text-xs text-stone-500 mt-1">Notifikasi akan muncul di sini</p>
+        </div>
+      ) : (
+        <div>
+          {sampleNotifs.map(n => {
+            const { icon: Icon, color } = iconFor(n.type);
+            return (
+              <div key={n.id} className={`px-5 py-4 flex gap-3 border-b border-stone-50 ${!n.read ? 'bg-green-50/40' : ''}`}>
+                <div className={`w-10 h-10 rounded-full ${color} flex items-center justify-center flex-shrink-0`}><Icon size={18} /></div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-semibold text-sm">{n.title}</p>
+                    {!n.read && <div className="w-2 h-2 rounded-full bg-green-700 mt-1.5 flex-shrink-0"></div>}
+                  </div>
+                  <p className="text-xs text-stone-600 mt-0.5">{n.message}</p>
+                  <p className="text-[10px] text-stone-400 mt-1">{formatTime(n.created_at)}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
+
+function SettingsPage({ user, navigateTo, supabase, backTo }: any) {
+  const [editMode, setEditMode] = useState(false);
+  const [fullName, setFullName] = useState(user.full_name || '');
+  const [phone, setPhone] = useState(user.phone || '');
+  const [saving, setSaving] = useState(false);
+  const [pushNotif, setPushNotif] = useState(true);
+  const [emailNotif, setEmailNotif] = useState(true);
+  const [promoNotif, setPromoNotif] = useState(true);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+  const saveProfile = async () => {
+    setSaving(true);
+    const { error } = await supabase.from('profiles').update({ full_name: fullName, phone }).eq('id', user.id);
+    if (!error) {
+      setEditMode(false);
+      alert('Profil berhasil diperbarui');
+    } else {
+      alert('Gagal: ' + error.message);
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div className="animate-fade-in pb-8">
+      <div className="sticky top-0 z-20 bg-white border-b border-stone-100 px-5 py-4 flex items-center gap-3">
+        <button onClick={() => navigateTo(backTo)}><ArrowLeft size={22} /></button>
+        <h1 className="font-display text-lg font-bold">Pengaturan</h1>
+      </div>
+      <div className="px-5 py-5">
+        {/* Profile Edit */}
+        <div className="mb-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-display text-base font-bold">Info Profil</h3>
+            {!editMode ? (
+              <button onClick={() => setEditMode(true)} className="text-xs text-green-700 font-semibold flex items-center gap-1"><Edit3 size={12} /> Edit</button>
+            ) : (
+              <div className="flex gap-2">
+                <button onClick={() => { setEditMode(false); setFullName(user.full_name || ''); setPhone(user.phone || ''); }} className="text-xs text-stone-500 font-semibold">Batal</button>
+                <button onClick={saveProfile} disabled={saving} className="text-xs text-green-700 font-bold">{saving ? 'Menyimpan...' : 'Simpan'}</button>
+              </div>
+            )}
+          </div>
+          <div className="bg-white border border-stone-100 rounded-2xl p-4 space-y-3">
+            <div>
+              <label className="text-xs text-stone-500">Nama Lengkap</label>
+              {editMode ? (
+                <input value={fullName} onChange={e => setFullName(e.target.value)} className="w-full mt-1 px-3 py-2 bg-stone-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-700" />
+              ) : (
+                <p className="font-semibold text-sm mt-0.5">{user.full_name || '-'}</p>
+              )}
+            </div>
+            <div>
+              <label className="text-xs text-stone-500">Email</label>
+              <p className="font-semibold text-sm mt-0.5">{user.email}</p>
+            </div>
+            <div>
+              <label className="text-xs text-stone-500">No. Telepon</label>
+              {editMode ? (
+                <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="08123456789" className="w-full mt-1 px-3 py-2 bg-stone-50 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-700" />
+              ) : (
+                <p className="font-semibold text-sm mt-0.5">{user.phone || '-'}</p>
+              )}
+            </div>
+            <div>
+              <label className="text-xs text-stone-500">Role</label>
+              <p className="font-semibold text-sm mt-0.5 capitalize">{user.role}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Notifications */}
+        <div className="mb-5">
+          <h3 className="font-display text-base font-bold mb-3">Notifikasi</h3>
+          <div className="bg-white border border-stone-100 rounded-2xl divide-y divide-stone-50">
+            {[
+              { label: 'Push Notification', desc: 'Notifikasi di perangkat ini', value: pushNotif, set: setPushNotif },
+              { label: 'Email', desc: 'Update via email', value: emailNotif, set: setEmailNotif },
+              { label: 'Promo & Penawaran', desc: 'Info promo terbaru', value: promoNotif, set: setPromoNotif },
+            ].map((item, i) => (
+              <div key={i} className="px-4 py-3 flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="font-semibold text-sm">{item.label}</p>
+                  <p className="text-xs text-stone-500">{item.desc}</p>
+                </div>
+                <button onClick={() => item.set(!item.value)} className={`relative w-11 h-6 rounded-full transition-colors ${item.value ? 'bg-green-700' : 'bg-stone-300'}`}>
+                  <div className={`absolute top-0.5 ${item.value ? 'right-0.5' : 'left-0.5'} w-5 h-5 bg-white rounded-full shadow transition-all`}></div>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Security */}
+        <div className="mb-5">
+          <h3 className="font-display text-base font-bold mb-3">Keamanan</h3>
+          <div className="bg-white border border-stone-100 rounded-2xl overflow-hidden">
+            <button onClick={() => setShowPasswordModal(true)} className="w-full px-4 py-3 flex items-center justify-between hover:bg-stone-50 border-b border-stone-50">
+              <div className="flex items-center gap-3"><Lock size={18} className="text-stone-600" /><span className="font-semibold text-sm">Ganti Password</span></div>
+              <ChevronRight size={18} className="text-stone-400" />
+            </button>
+            <button onClick={() => alert('Fitur 2FA segera hadir')} className="w-full px-4 py-3 flex items-center justify-between hover:bg-stone-50">
+              <div className="flex items-center gap-3"><Shield size={18} className="text-stone-600" /><span className="font-semibold text-sm">Two-Factor Auth</span></div>
+              <ChevronRight size={18} className="text-stone-400" />
+            </button>
+          </div>
+        </div>
+
+        {/* About */}
+        <div className="mb-5">
+          <h3 className="font-display text-base font-bold mb-3">Tentang</h3>
+          <div className="bg-white border border-stone-100 rounded-2xl px-4 py-3">
+            <div className="flex justify-between py-1"><span className="text-sm text-stone-600">Versi</span><span className="text-sm font-semibold">1.0.0</span></div>
+            <div className="flex justify-between py-1"><span className="text-sm text-stone-600">Build</span><span className="text-sm font-semibold font-mono">2026.05.16</span></div>
+          </div>
+        </div>
+      </div>
+
+      {showPasswordModal && (
+        <PasswordChangeModal supabase={supabase} onClose={() => setShowPasswordModal(false)} />
+      )}
+    </div>
+  );
+}
+
+function PasswordChangeModal({ supabase, onClose }: any) {
+  const [newPass, setNewPass] = useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const handleChange = async () => {
+    if (newPass.length < 6) { alert('Password minimal 6 karakter'); return; }
+    if (newPass !== confirmPass) { alert('Password tidak cocok'); return; }
+    setSaving(true);
+    const { error } = await supabase.auth.updateUser({ password: newPass });
+    if (!error) { alert('Password berhasil diubah'); onClose(); }
+    else { alert('Gagal: ' + error.message); }
+    setSaving(false);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-end" onClick={onClose}>
+      <div className="bg-white w-full max-w-md mx-auto rounded-t-3xl p-6 animate-slide-up" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="font-display text-lg font-bold">Ganti Password</h3>
+          <button onClick={onClose}><X size={22} /></button>
+        </div>
+        <div className="space-y-3 mb-4">
+          <input type="password" value={newPass} onChange={e => setNewPass(e.target.value)} placeholder="Password baru" className="w-full px-4 py-3 bg-stone-50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-700" />
+          <input type="password" v
